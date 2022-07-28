@@ -1,0 +1,6 @@
+> docker images
+
+REPOSITORY                     TAG       IMAGE ID       CREATED         SIZE
+sagrabarskiy/ubuntu-tmp-file   latest    b8ff021a1921   6 seconds ago   63.1MB
+ubuntu                         18.04     ad080923604a   7 weeks ago     63.1MB
+hello-world                    latest    feb5d9fea6a5   10 months ago   13.3kB
