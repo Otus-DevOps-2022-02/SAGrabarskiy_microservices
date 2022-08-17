@@ -1,0 +1,26 @@
+- name: install my kube objects
+  hosts: kubernetes_master_nodes
+  gather_facts: false
+
+  vars:
+    ansible_python_interpreter: '{{ ansible_playbook_python }}'
+
+  tasks:
+
+    - name: install pre-requisites
+      pip:
+        name:
+          - setuptools
+          - openshift
+          - pyyaml
+          - kubernetes
+    
+    - name: copy post-deployment.yml to /tmp directory
+      copy: src=../../reddit/post-deployment.yml mode=0775 dest=$HOME/post-deployment.yml
+
+    - name: Install all objects from def files
+      k8s:
+        src: "/home/ubuntu/post-deployment.yml"
+        state: present
+        namespace: default
+        apply: true

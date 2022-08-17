@@ -1,0 +1,10 @@
+{
+	"folder_id":"1",
+	"source_image_name":"ubuntu-1604-lts",
+	"subnet_id":"2",
+	"service_account_key_file": "./packer/key.json",
+	"source_image_name_immutable":"reddit-base-test",
+	"image_name_base":"reddit-k8s-master",
+	"image_name_immutable":"reddit-k8s-worker",
+	"uname":"3"
+}

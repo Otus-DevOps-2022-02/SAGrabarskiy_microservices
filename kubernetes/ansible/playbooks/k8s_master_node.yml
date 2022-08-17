@@ -1,0 +1,48 @@
+- hosts: kubernetes_master_nodes
+  become: yes
+  become_method: sudo
+  vars_files:
+  - env_variables
+  tasks:
+
+  - name: Resetting kubeadm
+    shell: kubeadm reset -f
+    register: output
+
+  - name: remove $HOME/.kube
+    file: path=$HOME/.kube mode=0775 state=absent
+    become: false
+
+  - name: Initializing Kubernetes cluster 
+    shell: kubeadm init --node-name={{ inventory_hostname }} --apiserver-advertise-address=0.0.0.0 --apiserver-cert-extra-sans=0.0.0.0,127.0.0.1,localhost,{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }} --pod-network-cidr={{ cidr }}
+    with_items: "{{ groups.kubernetes_master_nodes }}"
+
+  - name: mkdir $HOME/.kube
+    file: path=$HOME/.kube mode=0775 state=directory
+    become: false
+
+  - name: copy /etc/kubernetes/admin.conf to /tmp directory
+    copy: src=/etc/kubernetes/admin.conf mode=0775 dest=/tmp/config remote_src=yes
+
+  - name: copy config to $HOME/.kube/
+    copy: src=/tmp/config dest=$HOME/.kube/config remote_src=yes
+    become: false
+  
+  - name: download calico.yaml
+    get_url:
+      url: https://projectcalico.docs.tigera.io/manifests/calico.yaml
+      validate_certs: false
+      dest: "/tmp/calico.yaml"
+      mode: 0755
+
+  - name: apply calico pod network
+    command: kubectl apply -f /tmp/calico.yaml
+    become: false
+
+  - name: get join command
+    command: kubeadm token create --print-join-command
+    register: join_command
+
+  - name: Copy join command to local file
+    local_action: copy content="{{ join_command.stdout_lines[0] }}" dest="./join-command"
+    become: False

@@ -1,0 +1,12 @@
+- hosts: kubernetes_worker_nodes
+  become: yes
+
+  tasks:
+  - name: Copy the join command to server location
+    copy: src=join-command dest=/tmp/join-command.sh mode=0777
+
+  - name: Add node-name to join command
+    shell: echo ' --node-name={{ inventory_hostname }}' >> /tmp/join-command.sh
+
+  - name: Join the node to cluster
+    command: sh /tmp/join-command.sh
